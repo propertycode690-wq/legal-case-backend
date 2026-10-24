@@ -18,18 +18,25 @@ app.use(compression());
 // Middleware
 const clientUrls = (process.env.CLIENT_URL || '')
   .split(',')
-  .map(url => url.trim())
+  .map(url => url.trim().replace(/\/$/, ''))
   .filter(Boolean);
+
+const allowedSpecificOrigins = [
+  'https://legal-casee-management.netlify.app',
+  'https://legal-case-manage.kiaansoftware.com'
+];
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl, or same-origin)
     if (!origin) return callback(null, true);
     
-    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
-    const isAllowedDomain = origin.endsWith('.railway.app') || 
-                            origin.endsWith('.kiaansoftware.com');
-    const isClientUrl = clientUrls.includes(origin);
+    const cleanOrigin = origin.replace(/\/$/, '');
+    const isLocalhost = cleanOrigin.includes('localhost') || cleanOrigin.includes('127.0.0.1');
+    const isAllowedDomain = cleanOrigin.endsWith('.railway.app') || 
+                            cleanOrigin.endsWith('.kiaansoftware.com') ||
+                            cleanOrigin.endsWith('.netlify.app');
+    const isClientUrl = clientUrls.includes(cleanOrigin) || allowedSpecificOrigins.includes(cleanOrigin);
     const isDev = process.env.NODE_ENV !== 'production';
 
     if (isLocalhost || isAllowedDomain || isClientUrl || isDev) {
@@ -39,7 +46,9 @@ app.use(cors({
       callback(null, false);
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

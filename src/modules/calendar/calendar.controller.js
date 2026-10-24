@@ -67,7 +67,7 @@ exports.callbackOutlook = async (req, res, next) => {
     const { userId } = JSON.parse(Buffer.from(state, 'base64').toString('utf-8'));
     await outlookService.handleCallback(code, parseInt(userId, 10));
 
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').split(',')[0].trim().replace(/\/$/, '');
     res.redirect(`${clientUrl}/admin/settings?tab=Integrations`);
   } catch (error) {
     console.error('Error during Outlook OAuth callback:', error.message);

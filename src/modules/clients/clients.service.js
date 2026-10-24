@@ -427,7 +427,8 @@ const sendPortalInvite = async (clientId, user) => {
     });
 
     // Triggers email dispatch
-    const portalUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/portal-invite?token=${inviteToken}`;
+    const primaryClientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').split(',')[0].trim().replace(/\/$/, '');
+    const portalUrl = `${primaryClientUrl}/portal-invite?token=${inviteToken}`;
     console.log(`[Email Dispatch] Transactional Portal Invitation Link: ${portalUrl}`);
 
     const titanEmailService = require('../../services/email/titanEmail.service');
